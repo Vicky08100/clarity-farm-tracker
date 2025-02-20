@@ -2,11 +2,11 @@
 
 ;; Constants
 (define-constant contract-owner tx-sender)
-(define-constant ERROR-NOT-AUTHORIZED (err u1))
-(define-constant ERROR-PRODUCT-DOES-NOT-EXIST (err u2))
-(define-constant ERROR-INVALID-STATUS-CHANGE (err u3))
-(define-constant ERROR-PRODUCT-ALREADY-EXISTS (err u4))
-(define-constant ERROR-INVALID-PARAMETER (err u5))
+(define-constant ERR_NOT_AUTHORIZED (err u1))
+(define-constant ERR_PRODUCT_DOES_NOT_EXIST (err u2))
+(define-constant ERR_INVALID_STATUS_CHANGE (err u3))
+(define-constant ERR_PRODUCT_ALREADY_EXISTS (err u4))
+(define-constant ERR_INVALID_PARAMETER (err u5))
 
 ;; Data Variables
 (define-data-var required-quality-score uint u60)
@@ -103,9 +103,9 @@
 ;; Administrative Functions
 (define-public (register-stakeholder (stakeholder-address principal) (stakeholder-type (string-ascii 20)))
     (begin
-        (asserts! (is-eq tx-sender contract-owner) ERROR-NOT-AUTHORIZED)
-        (asserts! (is-none (map-get? stakeholder-registry stakeholder-address)) ERROR-PRODUCT-ALREADY-EXISTS)
-        (asserts! (validate-short-string stakeholder-type) ERROR-INVALID-PARAMETER)
+        (asserts! (is-eq tx-sender contract-owner) ERR_NOT_AUTHORIZED)
+        (asserts! (is-none (map-get? stakeholder-registry stakeholder-address)) ERR_PRODUCT_ALREADY_EXISTS)
+        (asserts! (validate-short-string stakeholder-type) ERR_INVALID_PARAMETER)
         (ok (map-set stakeholder-registry 
             stakeholder-address
             {
@@ -119,8 +119,8 @@
 
 (define-public (update-stakeholder-status (stakeholder-address principal) (new-status bool))
     (begin
-        (asserts! (is-eq tx-sender contract-owner) ERROR-NOT-AUTHORIZED)
-        (asserts! (is-some (map-get? stakeholder-registry stakeholder-address)) ERROR-NOT-AUTHORIZED)
+        (asserts! (is-eq tx-sender contract-owner) ERR_NOT_AUTHORIZED)
+        (asserts! (is-some (map-get? stakeholder-registry stakeholder-address)) ERR_NOT_AUTHORIZED)
         (ok (map-set stakeholder-registry 
             stakeholder-address
             (merge (unwrap-panic (map-get? stakeholder-registry stakeholder-address))
@@ -137,12 +137,12 @@
     (product-price uint))
     (let ((registering-party tx-sender))
         (begin
-            (asserts! (is-stakeholder-active registering-party) ERROR-NOT-AUTHORIZED)
-            (asserts! (is-none (map-get? product-registry product-id)) ERROR-PRODUCT-ALREADY-EXISTS)
-            (asserts! (validate-number product-id) ERROR-INVALID-PARAMETER)
-            (asserts! (validate-medium-string product-name) ERROR-INVALID-PARAMETER)
-            (asserts! (validate-long-string product-location) ERROR-INVALID-PARAMETER)
-            (asserts! (validate-number product-price) ERROR-INVALID-PARAMETER)
+            (asserts! (is-stakeholder-active registering-party) ERR_NOT_AUTHORIZED)
+            (asserts! (is-none (map-get? product-registry product-id)) ERR_PRODUCT_ALREADY_EXISTS)
+            (asserts! (validate-number product-id) ERR_INVALID_PARAMETER)
+            (asserts! (validate-medium-string product-name) ERR_INVALID_PARAMETER)
+            (asserts! (validate-long-string product-location) ERR_INVALID_PARAMETER)
+            (asserts! (validate-number product-price) ERR_INVALID_PARAMETER)
             (ok (map-set product-registry
                 product-id
                 {
@@ -167,14 +167,14 @@
     (state-change-notes (string-ascii 200)))
     (let (
         (updating-party tx-sender)
-        (product-info (unwrap! (map-get? product-registry product-id) ERROR-PRODUCT-DOES-NOT-EXIST))
+        (product-info (unwrap! (map-get? product-registry product-id) ERR_PRODUCT_DOES_NOT_EXIST))
         )
         (begin
-            (asserts! (is-stakeholder-active updating-party) ERROR-NOT-AUTHORIZED)
-            (asserts! (is-eq (get current-owner product-info) updating-party) ERROR-NOT-AUTHORIZED)
-            (asserts! (validate-number product-id) ERROR-INVALID-PARAMETER)
-            (asserts! (validate-short-string new-state) ERROR-INVALID-PARAMETER)
-            (asserts! (validate-description state-change-notes) ERROR-INVALID-PARAMETER)
+            (asserts! (is-stakeholder-active updating-party) ERR_NOT_AUTHORIZED)
+            (asserts! (is-eq (get current-owner product-info) updating-party) ERR_NOT_AUTHORIZED)
+            (asserts! (validate-number product-id) ERR_INVALID_PARAMETER)
+            (asserts! (validate-short-string new-state) ERR_INVALID_PARAMETER)
+            (asserts! (validate-description state-change-notes) ERR_INVALID_PARAMETER)
             (map-set product-registry
                 product-id
                 (merge product-info {current-state: new-state})
@@ -200,14 +200,14 @@
     (transfer-details (string-ascii 200)))
     (let (
         (current-owner tx-sender)
-        (product-info (unwrap! (map-get? product-registry product-id) ERROR-PRODUCT-DOES-NOT-EXIST))
+        (product-info (unwrap! (map-get? product-registry product-id) ERR_PRODUCT_DOES_NOT_EXIST))
         )
         (begin
-            (asserts! (is-stakeholder-active current-owner) ERROR-NOT-AUTHORIZED)
-            (asserts! (is-stakeholder-active new-owner) ERROR-NOT-AUTHORIZED)
-            (asserts! (is-eq (get current-owner product-info) current-owner) ERROR-NOT-AUTHORIZED)
-            (asserts! (validate-number product-id) ERROR-INVALID-PARAMETER)
-            (asserts! (validate-description transfer-details) ERROR-INVALID-PARAMETER)
+            (asserts! (is-stakeholder-active current-owner) ERR_NOT_AUTHORIZED)
+            (asserts! (is-stakeholder-active new-owner) ERR_NOT_AUTHORIZED)
+            (asserts! (is-eq (get current-owner product-info) current-owner) ERR_NOT_AUTHORIZED)
+            (asserts! (validate-number product-id) ERR_INVALID_PARAMETER)
+            (asserts! (validate-description transfer-details) ERR_INVALID_PARAMETER)
             (map-set product-registry
                 product-id
                 (merge product-info {
@@ -236,13 +236,13 @@
     (quality-update-notes (string-ascii 200)))
     (let (
         (quality-inspector tx-sender)
-        (product-info (unwrap! (map-get? product-registry product-id) ERROR-PRODUCT-DOES-NOT-EXIST))
+        (product-info (unwrap! (map-get? product-registry product-id) ERR_PRODUCT_DOES_NOT_EXIST))
         )
         (begin
-            (asserts! (is-stakeholder-active quality-inspector) ERROR-NOT-AUTHORIZED)
-            (asserts! (validate-number product-id) ERROR-INVALID-PARAMETER)
-            (asserts! (<= new-quality-score u100) ERROR-INVALID-PARAMETER)
-            (asserts! (validate-description quality-update-notes) ERROR-INVALID-PARAMETER)
+            (asserts! (is-stakeholder-active quality-inspector) ERR_NOT_AUTHORIZED)
+            (asserts! (validate-number product-id) ERR_INVALID_PARAMETER)
+            (asserts! (<= new-quality-score u100) ERR_INVALID_PARAMETER)
+            (asserts! (validate-description quality-update-notes) ERR_INVALID_PARAMETER)
             (map-set product-registry
                 product-id
                 (merge product-info {
@@ -271,14 +271,14 @@
     (location-update-notes (string-ascii 200)))
     (let (
         (updating-party tx-sender)
-        (product-info (unwrap! (map-get? product-registry product-id) ERROR-PRODUCT-DOES-NOT-EXIST))
+        (product-info (unwrap! (map-get? product-registry product-id) ERR_PRODUCT_DOES_NOT_EXIST))
         )
         (begin
-            (asserts! (is-stakeholder-active updating-party) ERROR-NOT-AUTHORIZED)
-            (asserts! (is-eq (get current-owner product-info) updating-party) ERROR-NOT-AUTHORIZED)
-            (asserts! (validate-number product-id) ERROR-INVALID-PARAMETER)
-            (asserts! (validate-long-string new-location) ERROR-INVALID-PARAMETER)
-            (asserts! (validate-description location-update-notes) ERROR-INVALID-PARAMETER)
+            (asserts! (is-stakeholder-active updating-party) ERR_NOT_AUTHORIZED)
+            (asserts! (is-eq (get current-owner product-info) updating-party) ERR_NOT_AUTHORIZED)
+            (asserts! (validate-number product-id) ERR_INVALID_PARAMETER)
+            (asserts! (validate-long-string new-location) ERR_INVALID_PARAMETER)
+            (asserts! (validate-description location-update-notes) ERR_INVALID_PARAMETER)
             (map-set product-registry
                 product-id
                 (merge product-info {physical-location: new-location})

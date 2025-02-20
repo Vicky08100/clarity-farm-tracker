@@ -80,11 +80,11 @@ A Clarity smart contract for managing agricultural supply chains on the Stacks b
 ```
 
 ## Error Codes
-- `ERROR-NOT-AUTHORIZED (u1)`: Unauthorized access attempt
-- `ERROR-PRODUCT-DOES-NOT-EXIST (u2)`: Product ID not found
-- `ERROR-INVALID-STATUS-CHANGE (u3)`: Invalid state transition
-- `ERROR-PRODUCT-ALREADY-EXISTS (u4)`: Duplicate product ID
-- `ERROR-INVALID-PARAMETER (u5)`: Invalid input parameters
+- `ERR_NOT_AUTHORIZED (u1)`: Unauthorized access attempt
+- `ERR_PRODUCT_DOES_NOT_EXIST (u2)`: Product ID not found
+- `ERR_INVALID_STATUS_CHANGE (u3)`: Invalid state transition
+- `ERR_PRODUCT_ALREADY_EXISTS (u4)`: Duplicate product ID
+- `ERR_INVALID_PARAMETER (u5)`: Invalid input parameters
 
 ## Input Validation
 - String length validation for all text inputs
